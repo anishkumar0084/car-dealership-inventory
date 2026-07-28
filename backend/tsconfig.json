@@ -10,5 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "types": ["node", "jest"]
-  }
+  },
+  "exclude": ["node_modules", "prisma.config.ts"]
 }
