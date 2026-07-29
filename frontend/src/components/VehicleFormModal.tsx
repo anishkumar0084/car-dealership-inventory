@@ -50,47 +50,49 @@ const VehicleFormModal = ({ vehicle, onClose, onSubmit }: VehicleFormModalProps)
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">
-          {vehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl w-full max-w-md p-6 text-white animate-in fade-in zoom-in-95 duration-200">
+        <h2 className="text-xl font-bold text-slate-100 mb-5 flex items-center gap-2">
+          {vehicle ? '✏️ Edit Vehicle Details' : '🚗 Add New Vehicle'}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Make</label>
+            <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Make / Brand</label>
             <input
               value={make}
               onChange={(e) => setMake(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition"
+              placeholder="e.g. Tesla, Toyota"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+            <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Model</label>
             <input
               value={model}
               onChange={(e) => setModel(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition"
+              placeholder="e.g. Model Y, RAV4"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Category</label>
             <input
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Sedan, SUV, Truck..."
+              className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition"
+              placeholder="e.g. Electric, SUV, Sedan"
             />
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+              <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Price ($)</label>
               <input
                 type="number"
                 value={price}
@@ -98,35 +100,37 @@ const VehicleFormModal = ({ vehicle, onClose, onSubmit }: VehicleFormModalProps)
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition"
+                placeholder="45000"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+              <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Stock Qty</label>
               <input
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 required
                 min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-slate-800 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition"
+                placeholder="5"
               />
             </div>
           </div>
 
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-300 transition"
+              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 rounded-xl text-sm font-bold border border-slate-700 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/15 transition cursor-pointer"
             >
-              {vehicle ? 'Update' : 'Add'}
+              {vehicle ? 'Update Details' : 'Add Vehicle'}
             </button>
           </div>
         </form>
