@@ -252,3 +252,62 @@ describe('DELETE /api/vehicles/:id', () => {
     expect(check).toBeNull();
   });
 });
+
+describe('POST /api/vehicles/:id/purchase', () => {
+  let vehicleId: string;
+  let outOfStockVehicleId: string;
+
+  beforeAll(async () => {
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: 'PurchaseTestMake',
+        model: 'PurchaseTestModel',
+        category: 'Sedan',
+        price: 22000,
+        quantity: 3,
+      },
+    });
+    vehicleId = vehicle.id;
+
+    const outOfStockVehicle = await prisma.vehicle.create({
+      data: {
+        make: 'PurchaseTestMake',
+        model: 'OutOfStockModel',
+        category: 'Sedan',
+        price: 22000,
+        quantity: 0,
+      },
+    });
+    outOfStockVehicleId = outOfStockVehicle.id;
+  });
+
+  afterAll(async () => {
+    await prisma.vehicle.deleteMany({ where: { make: 'PurchaseTestMake' } });
+  });
+
+  it('should decrease quantity by 1 on purchase', async () => {
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/purchase`)
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.vehicle.quantity).toBe(2);
+  });
+
+  it('should return 400 when purchasing an out-of-stock vehicle', async () => {
+    const response = await request(app)
+      .post(`/api/vehicles/${outOfStockVehicleId}/purchase`)
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('error');
+  });
+
+  it('should return 404 for a non-existent vehicle', async () => {
+    const response = await request(app)
+      .post('/api/vehicles/non-existent-id/purchase')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(response.status).toBe(404);
+  });
+});
