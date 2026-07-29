@@ -103,3 +103,27 @@ export const deleteVehicle = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
+
+export const purchaseVehicle = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    if (vehicle.quantity <= 0) {
+      return res.status(400).json({ error: 'Vehicle is out of stock' });
+    }
+
+    const updatedVehicle = await prisma.vehicle.update({
+      where: { id },
+      data: { quantity: vehicle.quantity - 1 },
+    });
+
+    return res.status(200).json({ vehicle: updatedVehicle });
+  } catch (error) {
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+};
