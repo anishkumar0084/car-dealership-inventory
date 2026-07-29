@@ -311,3 +311,89 @@ describe('POST /api/vehicles/:id/purchase', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('POST /api/vehicles/:id/restock', () => {
+  let vehicleId: string;
+  let adminToken: string;
+  let regularUserToken: string;
+
+  beforeAll(async () => {
+    await prisma.user.deleteMany({
+      where: { email: { in: ['restockadmin@example.com', 'restockregular@example.com'] } },
+    });
+
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: 'RestockTestMake',
+        model: 'RestockTestModel',
+        category: 'SUV',
+        price: 28000,
+        quantity: 2,
+      },
+    });
+    vehicleId = vehicle.id;
+
+    // Regular user
+    await request(app).post('/api/auth/register').send({
+      name: 'Restock Regular',
+      email: 'restockregular@example.com',
+      password: 'password123',
+    });
+    const regularLogin = await request(app).post('/api/auth/login').send({
+      email: 'restockregular@example.com',
+      password: 'password123',
+    });
+    regularUserToken = regularLogin.body.token;
+
+    // Admin user
+    await request(app).post('/api/auth/register').send({
+      name: 'Restock Admin',
+      email: 'restockadmin@example.com',
+      password: 'password123',
+    });
+    await prisma.user.update({
+      where: { email: 'restockadmin@example.com' },
+      data: { role: 'admin' },
+    });
+    const adminLogin = await request(app).post('/api/auth/login').send({
+      email: 'restockadmin@example.com',
+      password: 'password123',
+    });
+    adminToken = adminLogin.body.token;
+  });
+
+  afterAll(async () => {
+    await prisma.vehicle.deleteMany({ where: { make: 'RestockTestMake' } });
+    await prisma.user.deleteMany({
+      where: { email: { in: ['restockadmin@example.com', 'restockregular@example.com'] } },
+    });
+  });
+
+  it('should reject restock by a non-admin user', async () => {
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${regularUserToken}`)
+      .send({ amount: 5 });
+
+    expect(response.status).toBe(403);
+  });
+
+  it('should increase quantity when restocked by an admin', async () => {
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ amount: 5 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.vehicle.quantity).toBe(7); // 2 + 5
+  });
+
+  it('should return 400 for invalid restock amount', async () => {
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ amount: -3 });
+
+    expect(response.status).toBe(400);
+  });
+});
