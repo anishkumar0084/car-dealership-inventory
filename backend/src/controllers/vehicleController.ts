@@ -127,3 +127,28 @@ export const purchaseVehicle = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
+
+export const restockVehicle = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { amount } = req.body;
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ error: 'Restock amount must be a positive number' });
+    }
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const updatedVehicle = await prisma.vehicle.update({
+      where: { id },
+      data: { quantity: vehicle.quantity + amount },
+    });
+
+    return res.status(200).json({ vehicle: updatedVehicle });
+  } catch (error) {
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+};
