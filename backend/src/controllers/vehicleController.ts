@@ -1,13 +1,14 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { BadRequestError, NotFoundError } from '../lib/errors';
 
-export const createVehicle = async (req: AuthRequest, res: Response) => {
+export const createVehicle = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { make, model, category, price, quantity } = req.body;
 
     if (!make || !model || !category || price === undefined || quantity === undefined) {
-      return res.status(400).json({ error: 'All vehicle fields are required' });
+      throw new BadRequestError('All vehicle fields are required');
     }
 
     const vehicle = await prisma.vehicle.create({
@@ -16,11 +17,11 @@ export const createVehicle = async (req: AuthRequest, res: Response) => {
 
     return res.status(201).json({ vehicle });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
 
-export const getVehicles = async (req: AuthRequest, res: Response) => {
+export const getVehicles = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const vehicles = await prisma.vehicle.findMany({
       orderBy: { createdAt: 'desc' },
@@ -28,11 +29,11 @@ export const getVehicles = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({ vehicles });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
 
-export const searchVehicles = async (req: AuthRequest, res: Response) => {
+export const searchVehicles = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { make, model, category, minPrice, maxPrice } = req.query;
 
@@ -55,19 +56,18 @@ export const searchVehicles = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({ vehicles });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
 
-
-export const updateVehicle = async (req: AuthRequest, res: Response) => {
+export const updateVehicle = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
     const { make, model, category, price, quantity } = req.body;
 
     const existingVehicle = await prisma.vehicle.findUnique({ where: { id } });
     if (!existingVehicle) {
-      return res.status(404).json({ error: 'Vehicle not found' });
+      throw new NotFoundError('Vehicle not found');
     }
 
     const updatedVehicle = await prisma.vehicle.update({
@@ -83,38 +83,38 @@ export const updateVehicle = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({ vehicle: updatedVehicle });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
 
-export const deleteVehicle = async (req: AuthRequest, res: Response) => {
+export const deleteVehicle = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
 
     const existingVehicle = await prisma.vehicle.findUnique({ where: { id } });
     if (!existingVehicle) {
-      return res.status(404).json({ error: 'Vehicle not found' });
+      throw new NotFoundError('Vehicle not found');
     }
 
     await prisma.vehicle.delete({ where: { id } });
 
     return res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
 
-export const purchaseVehicle = async (req: AuthRequest, res: Response) => {
+export const purchaseVehicle = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
 
     const vehicle = await prisma.vehicle.findUnique({ where: { id } });
     if (!vehicle) {
-      return res.status(404).json({ error: 'Vehicle not found' });
+      throw new NotFoundError('Vehicle not found');
     }
 
     if (vehicle.quantity <= 0) {
-      return res.status(400).json({ error: 'Vehicle is out of stock' });
+      throw new BadRequestError('Vehicle is out of stock');
     }
 
     const updatedVehicle = await prisma.vehicle.update({
@@ -124,22 +124,22 @@ export const purchaseVehicle = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({ vehicle: updatedVehicle });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
 
-export const restockVehicle = async (req: AuthRequest, res: Response) => {
+export const restockVehicle = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
     const { amount } = req.body;
 
     if (typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({ error: 'Restock amount must be a positive number' });
+      throw new BadRequestError('Restock amount must be a positive number');
     }
 
     const vehicle = await prisma.vehicle.findUnique({ where: { id } });
     if (!vehicle) {
-      return res.status(404).json({ error: 'Vehicle not found' });
+      throw new NotFoundError('Vehicle not found');
     }
 
     const updatedVehicle = await prisma.vehicle.update({
@@ -149,6 +149,6 @@ export const restockVehicle = async (req: AuthRequest, res: Response) => {
 
     return res.status(200).json({ vehicle: updatedVehicle });
   } catch (error) {
-    return res.status(500).json({ error: 'Something went wrong' });
+    next(error);
   }
 };
