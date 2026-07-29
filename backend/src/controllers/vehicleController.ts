@@ -31,3 +31,30 @@ export const getVehicles = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ error: 'Something went wrong' });
   }
 };
+
+export const searchVehicles = async (req: AuthRequest, res: Response) => {
+  try {
+    const { make, model, category, minPrice, maxPrice } = req.query;
+
+    const filters: any = {};
+
+    if (make) filters.make = { equals: make as string, mode: 'insensitive' };
+    if (model) filters.model = { equals: model as string, mode: 'insensitive' };
+    if (category) filters.category = { equals: category as string, mode: 'insensitive' };
+
+    if (minPrice || maxPrice) {
+      filters.price = {};
+      if (minPrice) filters.price.gte = parseFloat(minPrice as string);
+      if (maxPrice) filters.price.lte = parseFloat(maxPrice as string);
+    }
+
+    const vehicles = await prisma.vehicle.findMany({
+      where: filters,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return res.status(200).json({ vehicles });
+  } catch (error) {
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+};
