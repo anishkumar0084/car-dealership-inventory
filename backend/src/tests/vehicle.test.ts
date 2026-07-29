@@ -121,3 +121,54 @@ describe('GET /api/vehicles/search', () => {
     expect(response.body.vehicles.length).toBe(2); // Camry (25000) and Explorer (35000)
   });
 });
+
+describe('PUT /api/vehicles/:id', () => {
+  let vehicleId: string;
+
+  beforeAll(async () => {
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: 'UpdateTestMake',
+        model: 'UpdateTestModel',
+        category: 'Sedan',
+        price: 15000,
+        quantity: 4,
+      },
+    });
+    vehicleId = vehicle.id;
+  });
+
+  afterAll(async () => {
+    await prisma.vehicle.deleteMany({
+      where: { make: 'UpdateTestMake' },
+    });
+  });
+
+  it('should update a vehicle when authenticated', async () => {
+    const response = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ price: 18000, quantity: 6 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.vehicle.price).toBe(18000);
+    expect(response.body.vehicle.quantity).toBe(6);
+  });
+
+  it('should return 404 for a non-existent vehicle', async () => {
+    const response = await request(app)
+      .put('/api/vehicles/non-existent-id')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ price: 10000 });
+
+    expect(response.status).toBe(404);
+  });
+
+  it('should reject update without auth token', async () => {
+    const response = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .send({ price: 10000 });
+
+    expect(response.status).toBe(401);
+  });
+});
