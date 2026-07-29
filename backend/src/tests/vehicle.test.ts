@@ -99,7 +99,12 @@ describe('GET /api/vehicles/search', () => {
       .set('Authorization', `Bearer ${authToken}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.vehicles.length).toBe(2);
+    const models = response.body.vehicles.map((v: any) => v.model);
+    expect(models).toContain('Camry');
+    expect(models).toContain('Corolla');
+    response.body.vehicles.forEach((v: any) => {
+      expect(v.make.toLowerCase()).toBe('toyota');
+    });
   });
 
   it('should search vehicles by category', async () => {
@@ -108,8 +113,13 @@ describe('GET /api/vehicles/search', () => {
       .set('Authorization', `Bearer ${authToken}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.vehicles.length).toBe(1);
-    expect(response.body.vehicles[0].make).toBe('Ford');
+    const foundOurVehicle = response.body.vehicles.some(
+      (v: any) => v.make === 'Ford' && v.model === 'Explorer'
+    );
+    expect(foundOurVehicle).toBe(true);
+    response.body.vehicles.forEach((v: any) => {
+      expect(v.category.toLowerCase()).toBe('suv');
+    });
   });
 
   it('should search vehicles by price range', async () => {
@@ -118,7 +128,13 @@ describe('GET /api/vehicles/search', () => {
       .set('Authorization', `Bearer ${authToken}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.vehicles.length).toBe(2); // Camry (25000) and Explorer (35000)
+    const models = response.body.vehicles.map((v: any) => v.model);
+    expect(models).toContain('Camry');
+    expect(models).toContain('Explorer');
+    response.body.vehicles.forEach((v: any) => {
+      expect(v.price).toBeGreaterThanOrEqual(22000);
+      expect(v.price).toBeLessThanOrEqual(40000);
+    });
   });
 });
 
