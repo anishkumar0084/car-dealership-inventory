@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import VehicleCard from '../components/VehicleCard';
+import VehicleFormModal from '../components/VehicleFormModal';
 
 interface Vehicle {
   id: string;
@@ -26,6 +27,10 @@ const Dashboard = () => {
   const [category, setCategory] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
   const isAdmin = user?.role === 'admin';
 
@@ -109,9 +114,34 @@ const Dashboard = () => {
     }
   };
 
-  const handleEdit = (vehicle: Vehicle) => {
-    // Will be wired up to an edit modal in the next step
-    console.log('Edit vehicle', vehicle);
+  const handleOpenAddModal = () => {
+    setEditingVehicle(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (vehicle: Vehicle) => {
+    setEditingVehicle(vehicle);
+    setIsModalOpen(true);
+  };
+
+  const handleModalSubmit = async (data: {
+    make: string;
+    model: string;
+    category: string;
+    price: number;
+    quantity: number;
+  }) => {
+    try {
+      if (editingVehicle) {
+        await api.put(`/vehicles/${editingVehicle.id}`, data);
+      } else {
+        await api.post('/vehicles', data);
+      }
+      setIsModalOpen(false);
+      fetchVehicles();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Operation failed.');
+    }
   };
 
   const handleLogout = () => {
@@ -198,6 +228,7 @@ const Dashboard = () => {
           {isAdmin && (
             <button
               type="button"
+              onClick={handleOpenAddModal}
               className="ml-auto bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
             >
               + Add Vehicle
@@ -219,13 +250,21 @@ const Dashboard = () => {
               vehicle={vehicle}
               onPurchase={handlePurchase}
               isAdmin={isAdmin}
-              onEdit={handleEdit}
+              onEdit={handleOpenEditModal}
               onDelete={handleDelete}
               onRestock={handleRestock}
             />
           ))}
         </div>
       </main>
+
+      {isModalOpen && (
+        <VehicleFormModal
+          vehicle={editingVehicle}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleModalSubmit}
+        />
+      )}
     </div>
   );
 };
