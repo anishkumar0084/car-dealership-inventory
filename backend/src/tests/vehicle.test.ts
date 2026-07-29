@@ -172,3 +172,83 @@ describe('PUT /api/vehicles/:id', () => {
     expect(response.status).toBe(401);
   });
 });
+
+describe('DELETE /api/vehicles/:id', () => {
+  let vehicleId: string;
+  let adminToken: string;
+  let regularUserToken: string;
+
+  beforeAll(async () => {
+    // Clean up any leftover test data
+    await prisma.user.deleteMany({
+      where: { email: { in: ['admintester@example.com', 'regulartester@example.com'] } },
+    });
+
+    // Create a vehicle to delete
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: 'DeleteTestMake',
+        model: 'DeleteTestModel',
+        category: 'Sedan',
+        price: 12000,
+        quantity: 2,
+      },
+    });
+    vehicleId = vehicle.id;
+
+    // Register a regular user
+    await request(app).post('/api/auth/register').send({
+      name: 'Regular Tester',
+      email: 'regulartester@example.com',
+      password: 'password123',
+    });
+    const regularLogin = await request(app).post('/api/auth/login').send({
+      email: 'regulartester@example.com',
+      password: 'password123',
+    });
+    regularUserToken = regularLogin.body.token;
+
+    // Register an admin user, then manually promote to admin in DB
+    await request(app).post('/api/auth/register').send({
+      name: 'Admin Tester',
+      email: 'admintester@example.com',
+      password: 'password123',
+    });
+    await prisma.user.update({
+      where: { email: 'admintester@example.com' },
+      data: { role: 'admin' },
+    });
+    const adminLogin = await request(app).post('/api/auth/login').send({
+      email: 'admintester@example.com',
+      password: 'password123',
+    });
+    adminToken = adminLogin.body.token;
+  });
+
+  afterAll(async () => {
+    await prisma.vehicle.deleteMany({ where: { make: 'DeleteTestMake' } });
+    await prisma.user.deleteMany({
+      where: { email: { in: ['admintester@example.com', 'regulartester@example.com'] } },
+    });
+  });
+
+  it('should reject deletion by a non-admin user', async () => {
+    const response = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`)
+      .set('Authorization', `Bearer ${regularUserToken}`);
+
+    expect(response.status).toBe(403);
+  });
+
+  it('should allow deletion by an admin user', async () => {
+    const response = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(response.status).toBe(200);
+
+    // Confirm it's actually deleted
+    const check = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
+    expect(check).toBeNull();
+  });
+});
