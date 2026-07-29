@@ -230,32 +230,32 @@ const Dashboard = () => {
       )}
 
       {/* Header */}
-      <header className="bg-slate-900/60 border-b border-slate-700/50 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🚗</span>
-          <h1 className="text-xl font-extrabold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+      <header className="bg-slate-900/60 border-b border-slate-700/50 backdrop-blur-md px-4 sm:px-6 py-4 flex justify-between items-center sticky top-0 z-30">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="text-xl sm:text-2xl">🚗</span>
+          <h1 className="text-sm sm:text-xl font-extrabold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
             DEALERSHIP INVENTORY
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 font-sans">
           <div className="text-right">
-            <span className="block text-sm font-semibold text-slate-200">{user?.name}</span>
-            {isAdmin && <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">Admin</span>}
+            <span className="block text-xs sm:text-sm font-semibold text-slate-200">{user?.name}</span>
+            {isAdmin && <span className="text-[10px] sm:text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">Admin</span>}
           </div>
           <button
             onClick={handleLogout}
-            className="text-sm bg-slate-800 hover:bg-slate-700 hover:text-red-400 border border-slate-700 px-4 py-2 rounded-xl transition duration-200 shadow-md font-semibold"
+            className="text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 hover:text-red-400 border border-slate-700 px-3 sm:px-4 py-2 rounded-xl transition duration-200 shadow-md font-semibold"
           >
             Logout
           </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Search/Filter Bar */}
         <form
           onSubmit={handleSearch}
-          className="bg-slate-900/40 border border-slate-700/40 p-5 rounded-3xl shadow-xl mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm"
+          className="bg-slate-900/40 border border-slate-700/40 p-4 sm:p-5 rounded-3xl shadow-xl mb-8 flex flex-wrap gap-4 items-end backdrop-blur-sm"
         >
           <div className="flex-1 min-w-[140px]">
             <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Make</label>
@@ -295,17 +295,17 @@ const Dashboard = () => {
               placeholder="100000"
             />
           </div>
-          <div className="flex gap-2 min-w-[200px]">
+          <div className="flex gap-2 min-w-[200px] w-full sm:w-auto">
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all duration-200 cursor-pointer"
+              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all duration-200 cursor-pointer text-center"
             >
               Search
             </button>
             <button
               type="button"
               onClick={handleClearFilters}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-2.5 rounded-xl text-sm font-bold border border-slate-700 transition cursor-pointer"
+              className="flex-1 sm:flex-initial bg-slate-800 hover:bg-slate-700 text-slate-300 px-6 py-2.5 rounded-xl text-sm font-bold border border-slate-700 transition cursor-pointer text-center"
             >
               Clear
             </button>
@@ -315,7 +315,7 @@ const Dashboard = () => {
             <button
               type="button"
               onClick={handleOpenAddModal}
-              className="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/20 transition duration-200 cursor-pointer"
+              className="w-full sm:w-auto sm:ml-auto bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/20 transition duration-200 cursor-pointer text-center"
             >
               + Add Vehicle
             </button>
